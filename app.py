@@ -52,6 +52,21 @@ def api_config():
     return jsonify(monitor.config_snapshot())
 
 
+@app.route("/api/detection-config")
+def api_detection_config():
+    return jsonify(monitor.detection_config_snapshot())
+
+
+@app.route("/api/detection-config", methods=["PUT"])
+def api_update_detection_config():
+    payload = request.get_json(silent=True) or {}
+    try:
+        result = monitor.update_detection_config(payload)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify(result)
+
+
 @app.route("/api/roi", methods=["PUT"])
 def api_set_roi():
     payload = request.get_json(silent=True) or {}

@@ -171,7 +171,7 @@ aside {
 
 .roi-actions {
   display: grid;
-  grid-template-columns: 52px 1fr 1fr;
+  grid-template-columns: 52px 1fr 1fr 1fr;
   gap: 5px;
   margin-top: 8px;
 }
@@ -183,7 +183,8 @@ aside {
   margin-top: 6px;
 }
 
-input {
+input,
+select {
   min-width: 0;
   min-height: 30px;
   color: var(--text);
@@ -195,7 +196,8 @@ input {
   font-weight: 700;
 }
 
-input:focus {
+input:focus,
+select:focus {
   border-color: var(--blue);
   outline: none;
 }
@@ -222,7 +224,110 @@ button:disabled {
 
 a { color: var(--blue); }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.66);
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal-panel {
+  width: min(780px, 100%);
+  max-height: calc(100vh - 28px);
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-header {
+  margin-bottom: 10px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.settings-section {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.settings-section h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.settings-section label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.settings-section label span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.settings-section .checkbox-row {
+  flex-direction: row;
+  align-items: center;
+  min-height: 30px;
+}
+
+.checkbox-row input {
+  min-height: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.modal-footer {
+  position: sticky;
+  bottom: -10px;
+  padding-top: 10px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+
+.modal-status {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 920px) {
   main { grid-template-columns: 1fr; }
   .preview img { max-height: 58vh; }
+  .roi-actions { grid-template-columns: 1fr 1fr; }
+  .settings-section { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .settings-section { grid-template-columns: 1fr; }
 }

@@ -42,7 +42,13 @@ class IpWebcamSource:
 
     def open(self):
         self.close()
-        self.capture = cv2.VideoCapture(self.stream_url)
+        self.capture = cv2.VideoCapture()
+        timeout_ms = int(max(1, self.timeout) * 1000)
+        for prop_name in ("CAP_PROP_OPEN_TIMEOUT_MSEC", "CAP_PROP_READ_TIMEOUT_MSEC"):
+            prop = getattr(cv2, prop_name, None)
+            if prop is not None:
+                self.capture.set(prop, timeout_ms)
+        self.capture.open(self.stream_url)
         return self.capture.isOpened()
 
     def read(self):

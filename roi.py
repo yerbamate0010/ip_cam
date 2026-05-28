@@ -1,7 +1,10 @@
+import copy
 import json
 import os
 import threading
 import urllib.parse
+
+from detection_config import defaults_from_settings, normalize_detection_config
 
 
 MIN_ROI_SPAN = 0.02
@@ -99,9 +102,10 @@ def boxes_to_full_frame(boxes, offset):
 
 
 class RuntimeConfigStore:
-    def __init__(self, path, default_stream_url):
+    def __init__(self, path, default_stream_url, settings=None):
         self.path = path
         self.default_stream_url = normalize_stream_url(default_stream_url)
+        self.default_detection = defaults_from_settings(settings) if settings else normalize_detection_config({})
         self.lock = threading.Lock()
         self.payload = self._load()
 
@@ -133,8 +137,25 @@ class RuntimeConfigStore:
             self._save_locked()
         return normalized
 
+    def get_detection(self):
+        with self.lock:
+            return copy.deepcopy(self.payload["detection"])
+
+    def set_detection(self, detection):
+        with self.lock:
+            normalized = normalize_detection_config(detection, self.payload["detection"])
+            before = copy.deepcopy(self.payload["detection"])
+            self.payload["detection"] = normalized
+            self._save_locked()
+            after = copy.deepcopy(normalized)
+        return before, after
+
     def _load(self):
-        payload = {"roi": None, "stream_url": self.default_stream_url}
+        payload = {
+            "roi": None,
+            "stream_url": self.default_stream_url,
+            "detection": copy.deepcopy(self.default_detection),
+        }
         if not os.path.exists(self.path):
             return payload
 
@@ -144,6 +165,9 @@ class RuntimeConfigStore:
             payload["roi"] = normalize_roi(stored.get("roi"))
             if stored.get("stream_url"):
                 payload["stream_url"] = normalize_stream_url(stored["stream_url"])
+            payload["detection"] = normalize_detection_config(
+                stored.get("detection") or {}, self.default_detection
+            )
             return payload
         except (OSError, json.JSONDecodeError, ValueError):
             return payload

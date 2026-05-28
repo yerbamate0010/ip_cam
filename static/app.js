@@ -19,11 +19,36 @@ const roiClear = document.getElementById('roiClear');
 const streamForm = document.getElementById('streamForm');
 const streamInput = document.getElementById('streamInput');
 const streamSave = document.getElementById('streamSave');
+const detectionOpen = document.getElementById('detectionOpen');
+const detectionModal = document.getElementById('detectionModal');
+const detectionClose = document.getElementById('detectionClose');
+const detectionForm = document.getElementById('detectionForm');
+const detectionSave = document.getElementById('detectionSave');
+const detectionStatus = document.getElementById('detectionStatus');
+const detectionProfile = document.getElementById('detectionProfile');
+const modelPath = document.getElementById('modelPath');
+const yoloDevice = document.getElementById('yoloDevice');
+const dogConf = document.getElementById('dogConf');
+const personConf = document.getElementById('personConf');
+const yoloImgsz = document.getElementById('yoloImgsz');
+const detectWidth = document.getElementById('detectWidth');
+const idleDetectSeconds = document.getElementById('idleDetectSeconds');
+const activeDetectSeconds = document.getElementById('activeDetectSeconds');
+const activeTrackSeconds = document.getElementById('activeTrackSeconds');
+const postRollSeconds = document.getElementById('postRollSeconds');
+const minHitsDog = document.getElementById('minHitsDog');
+const minHitsPerson = document.getElementById('minHitsPerson');
+const evidenceFps = document.getElementById('evidenceFps');
+const triggerDog = document.getElementById('triggerDog');
+const triggerPerson = document.getElementById('triggerPerson');
+const previewEnabled = document.getElementById('previewEnabled');
 
 let currentRoi = null;
 let draftRoi = null;
 let editingRoi = false;
 let dragStart = null;
+let detectionProfiles = {};
+let fillingDetectionForm = false;
 
 function text(value, yes, no) {
   return value ? yes : no;
@@ -150,6 +175,98 @@ async function loadConfig() {
   renderRoi();
 }
 
+function displaySize(value) {
+  return value === 'auto' || value === 0 ? 'auto' : `${value}`;
+}
+
+function fillDetectionForm(config) {
+  fillingDetectionForm = true;
+  detectionProfile.value = config.profile || 'custom';
+  modelPath.value = config.model_path || '';
+  yoloDevice.value = config.yolo_device || 'auto';
+  dogConf.value = config.dog_conf;
+  personConf.value = config.person_conf;
+  yoloImgsz.value = displaySize(config.yolo_imgsz);
+  detectWidth.value = displaySize(config.detect_width);
+  idleDetectSeconds.value = config.idle_detect_seconds;
+  activeDetectSeconds.value = config.active_detect_seconds;
+  activeTrackSeconds.value = config.active_track_seconds;
+  postRollSeconds.value = config.post_roll_seconds;
+  minHitsDog.value = config.min_hits_dog;
+  minHitsPerson.value = config.min_hits_person;
+  evidenceFps.value = displaySize(config.evidence_fps);
+  triggerDog.checked = (config.trigger_labels || []).includes('dog');
+  triggerPerson.checked = (config.trigger_labels || []).includes('person');
+  previewEnabled.checked = Boolean(config.preview_enabled);
+  fillingDetectionForm = false;
+}
+
+function detectionPayload() {
+  const triggerLabels = [];
+  if (triggerDog.checked) triggerLabels.push('dog');
+  if (triggerPerson.checked) triggerLabels.push('person');
+  return {
+    profile: detectionProfile.value,
+    model_path: modelPath.value.trim(),
+    yolo_device: yoloDevice.value,
+    dog_conf: Number(dogConf.value),
+    person_conf: Number(personConf.value),
+    yolo_imgsz: yoloImgsz.value,
+    detect_width: detectWidth.value,
+    idle_detect_seconds: Number(idleDetectSeconds.value),
+    active_detect_seconds: Number(activeDetectSeconds.value),
+    active_track_seconds: Number(activeTrackSeconds.value),
+    post_roll_seconds: Number(postRollSeconds.value),
+    min_hits_dog: Number(minHitsDog.value),
+    min_hits_person: Number(minHitsPerson.value),
+    evidence_fps: evidenceFps.value,
+    trigger_labels: triggerLabels,
+    preview_enabled: previewEnabled.checked,
+  };
+}
+
+async function openDetectionModal() {
+  detectionModal.hidden = false;
+  detectionStatus.textContent = 'Laduje...';
+  const response = await fetch('/api/detection-config', { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error('detection config unavailable');
+  }
+  const payload = await response.json();
+  detectionProfiles = payload.profiles || {};
+  fillDetectionForm(payload.config || {});
+  detectionStatus.textContent = payload.model_status?.message || '-';
+}
+
+function closeDetectionModal() {
+  detectionModal.hidden = true;
+}
+
+async function saveDetectionConfig(event) {
+  event.preventDefault();
+  detectionSave.disabled = true;
+  detectionStatus.textContent = 'Zapisuje...';
+  try {
+    const response = await fetch('/api/detection-config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(detectionPayload()),
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      detectionStatus.textContent = payload.error || 'Blad zapisu';
+      return;
+    }
+    fillDetectionForm(payload.config);
+    detectionStatus.textContent = payload.restarted ? 'Przeladowuje silnik' : 'Zapisano';
+    refresh();
+  } catch (error) {
+    detectionStatus.textContent = 'Blad zapisu';
+  } finally {
+    detectionSave.disabled = false;
+  }
+}
+
 async function saveRoi() {
   if (!draftRoi) {
     return;
@@ -214,15 +331,19 @@ async function refresh() {
     const status = data.status;
     monitorStatus.textContent = status.recording
       ? 'nagrywa'
-      : text(status.running, 'aktywny', 'stop');
+      : status.engine_restarting
+        ? 'restart'
+        : status.engine_state === 'error'
+          ? 'blad'
+          : text(status.running, 'aktywny', 'stop');
     recording.textContent = text(status.recording, 'tak', 'nie');
     targetsVisible.textContent = status.target_visible
       ? `pies ${status.dog_count || 0} / osoba ${status.person_count || 0}`
       : 'brak';
     fpsInfo.textContent = `${status.actual_fps || '-'} / ${status.evidence_fps || '-'}`;
     cameraInfo.textContent = `${status.camera_resolution || status.frame_size || '-'} / ${status.camera_quality || '-'}`;
-    yoloInfo.textContent = `${status.active_detect_width || '-'}px / ${status.detect_interval || '-'}s`;
-    deviceInfo.textContent = `${status.yolo_device || '-'} / ${status.roi_active ? 'ROI' : 'pelny'}`;
+    yoloInfo.textContent = `${status.active_detect_width || '-'}px / ${status.requested_yolo_imgsz || '-'} / ${status.detect_interval || '-'}s`;
+    deviceInfo.textContent = `${status.yolo_device || '-'} / ${status.roi_pixels || (status.roi_active ? 'ROI' : 'pelny')}`;
     streamSource.textContent = sourceHost(status.stream_url);
     streamSource.title = status.stream_url || '';
     if (document.activeElement !== streamInput) {
@@ -244,6 +365,29 @@ roiEdit.addEventListener('click', () => setEditing(!editingRoi));
 roiSave.addEventListener('click', saveRoi);
 roiClear.addEventListener('click', clearRoi);
 streamForm.addEventListener('submit', saveStream);
+detectionOpen.addEventListener('click', () => openDetectionModal().catch(() => {
+  detectionModal.hidden = false;
+  detectionStatus.textContent = 'Blad konfiguracji';
+}));
+detectionClose.addEventListener('click', closeDetectionModal);
+detectionModal.addEventListener('click', (event) => {
+  if (event.target === detectionModal) {
+    closeDetectionModal();
+  }
+});
+detectionForm.addEventListener('submit', saveDetectionConfig);
+detectionProfile.addEventListener('change', () => {
+  const profile = detectionProfiles[detectionProfile.value];
+  if (profile) {
+    fillDetectionForm(profile);
+    detectionStatus.textContent = 'Profil gotowy';
+  }
+});
+detectionForm.addEventListener('input', (event) => {
+  if (!fillingDetectionForm && event.target !== detectionProfile) {
+    detectionProfile.value = 'custom';
+  }
+});
 
 roiLayer.addEventListener('pointerdown', (event) => {
   if (!editingRoi) {
