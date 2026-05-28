@@ -8,7 +8,7 @@ from detector import YoloDetector
 from recorder import EvidenceRecorder
 from roi import RuntimeConfigStore, crop_frame, roi_to_pixels
 from source import IpWebcamSource
-from video_utils import format_timestamp, preview_frame, processing_profile
+from video_utils import draw_detections, draw_roi, format_timestamp, preview_frame, processing_profile
 
 
 class DogMonitor:
@@ -340,8 +340,10 @@ class DogMonitor:
                         )
 
                     if recorder.recording:
-                        image = preview_frame(frame, visible_boxes, frame_profile["preview_width"], roi_pixels)
-                        image_path = recorder.save_image(image)
+                        full_frame = frame.copy()
+                        draw_roi(full_frame, roi_pixels, scale=1.0)
+                        draw_detections(full_frame, visible_boxes, scale=1.0)
+                        image_path = recorder.save_image(full_frame)
                         if image_path:
                             self._add_event(
                                 {
