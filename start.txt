@@ -1,0 +1,17 @@
+START PANELU
+
+1. Uruchom:
+YOLO_DEVICE=auto FLASK_DEBUG=1 ./venv/bin/python app.py
+
+2. Otworz w przegladarce:
+http://127.0.0.1:8000
+
+STOP
+
+Normalnie: Ctrl+C w terminalu z uruchomionym panelem.
+
+Awaryjnie znajdz proces:
+ps -ef | grep 'python app.py'
+
+I ubij PID z drugiej kolumny, np.:
+kill 6542

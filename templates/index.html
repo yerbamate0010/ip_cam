@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dog Watch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <main>
+      <section class="preview">
+        <div id="previewFrame" class="preview-frame">
+          <img id="preview" src="/preview.mjpg" alt="Podglad z detekcja obiektow" draggable="false" />
+          <div id="roiLayer" class="roi-layer">
+            <div id="roiBox" class="roi-box"></div>
+            <div id="roiDraft" class="roi-box roi-draft"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside>
+        <section class="panel">
+          <h2>Status</h2>
+          <div class="status-grid">
+            <div class="metric">
+              <span class="label">Stan</span>
+              <span id="monitorStatus" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">REC</span>
+              <span id="recording" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">Pies / osoba</span>
+              <span id="targetsVisible" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">FPS podglad / zapis</span>
+              <span id="fpsInfo" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">Kamera / JPEG</span>
+              <span id="cameraInfo" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">YOLO / det.</span>
+              <span id="yoloInfo" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">Device / ROI</span>
+              <span id="deviceInfo" class="value">-</span>
+            </div>
+            <div class="metric">
+              <span class="label">Stream</span>
+              <span id="streamSource" class="value compact">{{ default_stream }}</span>
+            </div>
+            <div class="metric">
+              <span class="label">Model</span>
+              <span id="modelName" class="value compact">-</span>
+            </div>
+          </div>
+          <div class="roi-actions">
+            <button id="roiEdit" type="button">ROI</button>
+            <button id="roiSave" type="button" disabled>Zapisz ROI</button>
+            <button id="roiClear" type="button">Wyczysc ROI</button>
+          </div>
+          <form id="streamForm" class="stream-form">
+            <input id="streamInput" type="text" name="stream_url" autocomplete="off" spellcheck="false" />
+            <button id="streamSave" type="submit">Polacz</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Ostatnie zdarzenia</h2>
+          <div id="events" class="events"></div>
+        </section>
+      </aside>
+    </main>
+  </body>
+</html>
