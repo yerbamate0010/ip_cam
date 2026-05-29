@@ -11,18 +11,18 @@ AUTO_CHOICES = {"auto", 0, "0", None}
 PROFILE_CONFIGS = {
     "stable": {
         "model_path": "yolov8s.pt",
-        "yolo_imgsz": 960,
-        "detect_width": 960,
-        "dog_conf": 0.24,
-        "person_conf": 0.35,
+        "yolo_imgsz": "auto",
+        "detect_width": "auto",
+        "dog_conf": 0.25,
+        "person_conf": 0.40,
         "idle_detect_seconds": 2.0,
         "active_detect_seconds": 0.5,
         "post_roll_seconds": 45,
     },
     "sensitive": {
         "model_path": "yolov8s.pt",
-        "yolo_imgsz": 1280,
-        "detect_width": 1280,
+        "yolo_imgsz": "auto",
+        "detect_width": "auto",
         "dog_conf": 0.18,
         "person_conf": 0.32,
         "idle_detect_seconds": 1.0,
@@ -31,11 +31,11 @@ PROFILE_CONFIGS = {
     },
     "max_detail": {
         "model_path": "yolov8s.pt",
-        "yolo_imgsz": 1536,
-        "detect_width": 1536,
-        "dog_conf": 0.14,
-        "person_conf": 0.30,
-        "idle_detect_seconds": 0.7,
+        "yolo_imgsz": "auto",
+        "detect_width": "auto",
+        "dog_conf": 0.12,
+        "person_conf": 0.28,
+        "idle_detect_seconds": 0.5,
         "active_detect_seconds": 0.25,
         "post_roll_seconds": 40,
     },
@@ -45,8 +45,8 @@ DEFAULT_DETECTION_CONFIG = {
     "profile": "sensitive",
     "model_path": "yolov8s.pt",
     "yolo_device": "auto",
-    "yolo_imgsz": 1280,
-    "detect_width": 1280,
+    "yolo_imgsz": "auto",
+    "detect_width": "auto",
     "dog_conf": 0.18,
     "person_conf": 0.32,
     "trigger_labels": ["dog", "person"],
@@ -205,8 +205,8 @@ def _size_choice(value):
     if value in AUTO_CHOICES:
         return "auto"
     number = _int_range(value, 1, 4096, "rozmiar YOLO")
-    if number not in {640, 768, 960, 1280, 1536}:
-        raise ValueError("Rozmiar YOLO musi byc auto, 640, 768, 960, 1280 albo 1536")
+    if number not in {640, 768, 960, 1280, 1536, 1920, 2560}:
+        raise ValueError("Rozmiar YOLO musi byc auto, 640, 768, 960, 1280, 1536, 1920 albo 2560")
     return number
 
 

@@ -24,39 +24,39 @@
           <h2>Status</h2>
           <div class="status-grid">
             <div class="metric">
-              <span class="label">Stan</span>
+              <span class="label">Status systemu</span>
               <span id="monitorStatus" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">REC</span>
+              <span class="label">Nagrywanie (REC)</span>
               <span id="recording" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">Pies / osoba</span>
+              <span class="label">Wykryte obiekty</span>
               <span id="targetsVisible" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">FPS podglad / zapis</span>
+              <span class="label">Klatki/s (Podglad / Zapis)</span>
               <span id="fpsInfo" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">Kamera / JPEG</span>
+              <span class="label">Jakosc (Kamera / JPEG)</span>
               <span id="cameraInfo" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">YOLO / det.</span>
+              <span class="label">AI (Rozdz. / Interwal)</span>
               <span id="yoloInfo" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">Device / ROI</span>
+              <span class="label">Akcelerator / Obszar</span>
               <span id="deviceInfo" class="value">-</span>
             </div>
             <div class="metric">
-              <span class="label">Stream</span>
+              <span class="label">Zrodlo strumienia</span>
               <span id="streamSource" class="value compact">{{ default_stream }}</span>
             </div>
             <div class="metric">
-              <span class="label">Model</span>
+              <span class="label">Aktywny model</span>
               <span id="modelName" class="value compact">-</span>
             </div>
           </div>
@@ -87,8 +87,8 @@
         </header>
 
         <section class="settings-section">
-          <h3>Profil</h3>
-          <label>
+          <h3>Profil ustawień</h3>
+          <label title="Wybierz gotowy zestaw parametrow lub dostosuj recznie">
             <span>Profil</span>
             <select id="detectionProfile" name="profile">
               <option value="stable">Stabilny</option>
@@ -100,13 +100,16 @@
         </section>
 
         <section class="settings-section">
-          <h3>Model</h3>
-          <label>
-            <span>Model</span>
-            <input id="modelPath" name="model_path" type="text" autocomplete="off" spellcheck="false" />
+          <h3>Wybór modelu</h3>
+          <label title="Model sieci neuronowej. yolov8n jest szybki, yolov8s jest dokladniejszy">
+            <span>Aktywny model</span>
+            <select id="modelPath" name="model_path">
+              <option value="yolov8n.pt">yolov8n.pt (szybszy)</option>
+              <option value="yolov8s.pt">yolov8s.pt (dokladniejszy)</option>
+            </select>
           </label>
-          <label>
-            <span>Device</span>
+          <label title="Jednostka obliczeniowa dla sieci neuronowej">
+            <span>Akcelerator (Device)</span>
             <select id="yoloDevice" name="yolo_device">
               <option value="auto">auto</option>
               <option value="cpu">cpu</option>
@@ -117,71 +120,73 @@
         </section>
 
         <section class="settings-section">
-          <h3>Progi</h3>
-          <label>
+          <h3>Czulosc detekcji (Progi pewnosci)</h3>
+          <label title="Minimalna pewnosc modelu, by uznac obiekt za psa (0.01 - 0.95)">
             <span>Pies</span>
             <input id="dogConf" name="dog_conf" type="number" min="0.01" max="0.95" step="0.01" />
           </label>
-          <label>
+          <label title="Minimalna pewnosc modelu, by uznac obiekt za czlowieka (0.01 - 0.95)">
             <span>Osoba</span>
             <input id="personConf" name="person_conf" type="number" min="0.01" max="0.95" step="0.01" />
           </label>
         </section>
 
         <section class="settings-section">
-          <h3>Obraz YOLO</h3>
-          <label>
-            <span>imgsz</span>
+          <h3>Przetwarzanie obrazu AI</h3>
+          <label title="Rozdzielczosc do ktorej skalowany jest obraz dla AI. Wyzsza daje lepsze detale, ale obciaza sprzet">
+            <span>Rozdz. AI (imgsz) [Auto/Wartosc]</span>
             <select id="yoloImgsz" name="yolo_imgsz">
               <option value="auto">auto</option>
-              <option value="960">960</option>
-              <option value="1280">1280</option>
-              <option value="1536">1536</option>
+              <option value="640">640 (VGA)</option>
+              <option value="1280">1280 (HD)</option>
+              <option value="1920">1920 (FHD)</option>
+              <option value="2560">2560 (2K)</option>
             </select>
           </label>
-          <label>
-            <span>Szerokosc</span>
+          <label title="Rozdzielczosc szerokosci obrazu pobieranego do detekcji z kamery">
+            <span>Szerokosc z kamery [Auto/px]</span>
             <select id="detectWidth" name="detect_width">
               <option value="auto">auto</option>
-              <option value="960">960</option>
-              <option value="1280">1280</option>
-              <option value="1536">1536</option>
+              <option value="640">640 (VGA)</option>
+              <option value="1280">1280 (HD)</option>
+              <option value="1920">1920 (FHD)</option>
+              <option value="2560">2560 (2K)</option>
             </select>
           </label>
         </section>
 
         <section class="settings-section">
-          <h3>Czestotliwosc</h3>
-          <label>
-            <span>Spoczynek</span>
+          <h3>Czestotliwosc analizy przez AI</h3>
+          <label title="Gdy przed kamera nic sie nie dzieje, sztuczna inteligencja sprawdza klatke wideo co X sekund (oszczedza prad i sprzet)">
+            <span>Gdy pusty kadr – sprawdzaj co (0.2s - 30s)</span>
             <input id="idleDetectSeconds" name="idle_detect_seconds" type="number" min="0.2" max="30" step="0.05" />
           </label>
-          <label>
-            <span>Aktywnie</span>
+          <label title="Gdy przed kamera jest obiekt (np. pies), sztuczna inteligencja dziala szybciej by dokladnie sledzic jego ruch">
+            <span>Gdy wykryto obiekt – sprawdzaj co (0.1s - 10s)</span>
             <input id="activeDetectSeconds" name="active_detect_seconds" type="number" min="0.1" max="10" step="0.05" />
           </label>
-          <label>
-            <span>Podtrzymanie</span>
+          <label title="Jesli pies ucieknie z kadru, system bedzie jeszcze dzialal na 'najwyzszych obrotach' przez X sekund czekajac na jego powrot">
+            <span>Po zniknieciu obiektu – szukaj go przez (1s - 120s)</span>
             <input id="activeTrackSeconds" name="active_track_seconds" type="number" min="1" max="120" step="0.5" />
           </label>
         </section>
 
         <section class="settings-section">
-          <h3>Nagrywanie</h3>
-          <label>
-            <span>Post-roll</span>
+          <h3>Zasady nagrywania wideo</h3>
+          <label title="Ile sekund wideo zapisać dodatkowo juz po tym jak obiekt zniknie z kadru">
+            <span>Dlugosc zapisu po zniknieciu (1s - 600s)</span>
             <input id="postRollSeconds" name="post_roll_seconds" type="number" min="1" max="600" step="1" />
           </label>
-          <label>
-            <span>Min pies</span>
+          <label title="Ile minimum klatek pod rzad musi miec psa, aby uznac to za pewne wykrycie i zaczac nagrywac">
+            <span>Min. klatek z psem (1 - 20)</span>
             <input id="minHitsDog" name="min_hits_dog" type="number" min="1" max="20" step="1" />
           </label>
-          <label>
-            <span>Min osoba</span>
+          <label title="Ile minimum klatek pod rzad musi miec czlowieka, aby uznac to za pewne wykrycie i zaczac nagrywac">
+            <span>Min. klatek z osoba (1 - 20)</span>
             <input id="minHitsPerson" name="min_hits_person" type="number" min="1" max="20" step="1" />
           </label>
-          <label>
-            <span>FPS zapis</span>
+          <label title="Ile klatek na sekunde ma miec gotowy, nagrany film">
+            <span>Plynnosc nagrania (FPS)</span>
             <select id="evidenceFps" name="evidence_fps">
               <option value="auto">auto</option>
               <option value="4">4</option>
@@ -191,21 +196,21 @@
               <option value="15">15</option>
             </select>
           </label>
-          <label class="checkbox-row">
+          <label class="checkbox-row" title="Jesli zaznaczone, pojawienie sie psa wywola alarm i zapis wideo">
             <input id="triggerDog" type="checkbox" />
-            <span>Trigger pies</span>
+            <span>Nagrywaj gdy wykryje psa</span>
           </label>
-          <label class="checkbox-row">
+          <label class="checkbox-row" title="Jesli zaznaczone, pojawienie sie czlowieka wywola alarm i zapis wideo">
             <input id="triggerPerson" type="checkbox" />
-            <span>Trigger osoba</span>
+            <span>Nagrywaj gdy wykryje osobe</span>
           </label>
         </section>
 
         <section class="settings-section">
-          <h3>Podglad</h3>
-          <label class="checkbox-row">
+          <h3>Opcje podgladu</h3>
+          <label class="checkbox-row" title="Wlacza przesylanie podgladu obrazu MJPEG do przegladarki (zwieksza zuzycie CPU i sieci)">
             <input id="previewEnabled" name="preview_enabled" type="checkbox" />
-            <span>Podglad MJPEG</span>
+            <span>Podglad MJPEG w przegladarce</span>
           </label>
         </section>
 
