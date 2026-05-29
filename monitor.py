@@ -130,8 +130,9 @@ class DogMonitor:
         current = self.config_store.get_detection()
         candidate = normalize_detection_config(payload, current)
         status = model_status(candidate["model_path"])
-        if not status["exists"]:
-            raise ValueError(status["message"])
+        # Pozwalamy na nieistniejace pliki, bo Ultralytics automatycznie je pobierze
+        # if not status["exists"]:
+        #     raise ValueError(status["message"])
 
         before, after = self.config_store.set_detection(candidate)
         restart_fields = changed_restart_fields(before, after)
@@ -277,8 +278,9 @@ class DogMonitor:
 
         try:
             status = model_status(detection["model_path"])
-            if not status["exists"]:
-                raise RuntimeError(status["message"])
+            # Pozwalamy na nieistniejace pliki, bo YOLO pobiera je automatycznie
+            # if not status["exists"]:
+            #     raise RuntimeError(status["message"])
             detector = YoloDetector(detection["model_path"], detection["yolo_device"])
             self._set_status(yolo_device=detector.device)
             if not self._open_source(source):
