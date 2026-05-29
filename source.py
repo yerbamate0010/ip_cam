@@ -8,7 +8,8 @@ import cv2
 
 def camera_base_url(stream_url):
     parsed = urllib.parse.urlsplit(stream_url)
-    return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "", "", ""))
+    scheme = "https" if parsed.scheme in ("https", "rtsps") else "http"
+    return urllib.parse.urlunsplit((scheme, parsed.netloc, "", "", ""))
 
 
 def ipwebcam_request(stream_url, path, params=None, timeout=5):
